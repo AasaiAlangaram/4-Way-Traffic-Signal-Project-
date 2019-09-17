@@ -34,6 +34,17 @@ while(y--);
 }
 
 //Function to send LCD Command
+/*
+RS - Register select
+0-Instruction Input
+1-Data Input
+
+R/W - Read/Write (R/W)
+0-Write to LCD
+1-Read from LCD
+
+Enable (E)-Allows access to the display through R/W and RS lines
+*/
 void lcd_command(unsigned char com)
 {
 PORTD=com;
@@ -56,10 +67,10 @@ en=0;
 }
 void lcd_init()
 {
-lcd_command(0X38);
-lcd_command(0X06);
-lcd_command(0X0c);
-lcd_command(0X01);
+lcd_command(0X38);//8-bit mode
+lcd_command(0X06);//entry mode
+lcd_command(0X0c);//display on and cursor off
+lcd_command(0X01);//clear display
 }
 void lcd_disply(const unsigned char *da)
 {
@@ -74,26 +85,26 @@ void delay1()
 {
 for(j=0;j<110;j++)
 {
-TMR1L=0X2B;
-TMR1H=0XCF;
-T1CKPS0=1;
-T1CKPS1=1;
-TMR1CS=0;
-TMR1ON=1;
-while(TMR1IF==0);
-TMR1IF=0;
-TMR1ON=0;
-g=g+1;
-if(g==10)
-{
-g=0;
-a=o/10;
-b=o%10;
-o=o-1;
-lcd_command(0X85);
-lcd_data(a+0X30);
-lcd_data(b+0X30);
-}
+  TMR1L=0X2B;//dec val = 43, LSB
+  TMR1H=0XCF;//dec val = 207, MSB 
+  T1CKPS0=1;
+  T1CKPS1=1;//1:8 prescalar value
+  TMR1CS=0;//external clk
+  TMR1ON=1;
+  while(TMR1IF==0);
+  TMR1IF=0;
+  TMR1ON=0;
+  g=g+1;
+  if(g==10)
+  {
+    g=0;
+    a=o/10;
+    b=o%10;
+    o=o-1;
+    lcd_command(0X85);
+    lcd_data(a+0X30);
+    lcd_data(b+0X30);
+  }
 }
 o=10;
 }
@@ -193,6 +204,9 @@ TMR1IF=0;
 TMR1ON=0;
 }
 }
+
+/* MAIN function*/
+
 void main()
 {
 ADCON1=0X06;
